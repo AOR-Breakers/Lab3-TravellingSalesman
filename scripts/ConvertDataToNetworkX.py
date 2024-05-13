@@ -1,9 +1,12 @@
 import os
 import networkx as nx
 import tsplib95
+from pathlib import Path
 from typing import Dict
+from networkx.readwrite import json_graph
 
-tsp_directory = "data/tsp/"
+tsp_data_directory = "../data/tsp/"
+raw_data_directory = "../data/raw/"
 def TspToNetworkXGraph(filename: str) -> nx.classes.graph.Graph:
     tsp = tsplib95.load(filename)
     graph = nx.classes.graph.Graph(tsp.get_graph())
@@ -19,6 +22,25 @@ def CollectTspFilesToGraphs(directory: str) -> Dict[str, nx.classes.graph.Graph]
     return graphs
 
 # EXAMPLE 1.
-# graph_dict = CollectTspFilesToGraphs(tsp_directory)
+# graph_dict = CollectTspFilesToGraphs(tsp_data_directory)
 # example_graph = graph_dict['ch150']
 # print(example_graph[1][3])
+
+# EXAMPLE 2.
+# graph_dict = CollectTspFilesToGraphs(tsp_data_directory)
+# example_graph = graph_dict['ch150']
+# print(nx.readwrite.write_weighted_edgelist(example_graph, raw_data_directory + 'ch150'))
+
+
+if __name__ == "__main__":
+    graphs_dict = CollectTspFilesToGraphs(tsp_data_directory)
+
+    for _ , problem_name in enumerate(graphs_dict):
+        current_graph = graphs_dict[problem_name]
+        raw_data_filename = raw_data_directory + problem_name
+        nx.readwrite.write_weighted_edgelist(current_graph, raw_data_filename)
+        with open(raw_data_filename, 'r+') as file:
+            data = file.read()
+            file.seek(0, 0)
+            file.write(f"{current_graph.number_of_nodes()} {current_graph.number_of_edges()}\n")
+            file.write(data)
