@@ -3,14 +3,17 @@ import networkx as nx
 import tsplib95
 from pathlib import Path
 from typing import Dict
-from networkx.readwrite import json_graph
 
 tsp_data_directory = "../data/tsp/"
 raw_data_directory = "../data/raw/"
+
+
 def TspToNetworkXGraph(filename: str) -> nx.classes.graph.Graph:
     tsp = tsplib95.load(filename)
     graph = nx.classes.graph.Graph(tsp.get_graph())
     return graph
+
+
 def CollectTspFilesToGraphs(directory: str) -> Dict[str, nx.classes.graph.Graph]:
     graphs = {}
     for filename in os.listdir(directory):
@@ -18,8 +21,12 @@ def CollectTspFilesToGraphs(directory: str) -> Dict[str, nx.classes.graph.Graph]
             filepath = os.path.join(directory, filename)
             graph_name = os.path.splitext(filename)[0]
             graph = TspToNetworkXGraph(filepath)
+            if not graph.has_node(0):
+                mapping = {i: i - 1 for i in range(graph.number_of_nodes() + 1)}
+                graph = nx.relabel_nodes(graph, mapping)
             graphs[graph_name] = graph
     return graphs
+
 
 # EXAMPLE 1.
 # graph_dict = CollectTspFilesToGraphs(tsp_data_directory)
@@ -35,12 +42,15 @@ def CollectTspFilesToGraphs(directory: str) -> Dict[str, nx.classes.graph.Graph]
 if __name__ == "__main__":
     graphs_dict = CollectTspFilesToGraphs(tsp_data_directory)
 
-    for _ , problem_name in enumerate(graphs_dict):
+    for _, problem_name in enumerate(graphs_dict):
         current_graph = graphs_dict[problem_name]
         raw_data_filename = raw_data_directory + problem_name
+
         nx.readwrite.write_weighted_edgelist(current_graph, raw_data_filename)
-        with open(raw_data_filename, 'r+') as file:
+        with open(raw_data_filename, "r+") as file:
             data = file.read()
             file.seek(0, 0)
-            file.write(f"{current_graph.number_of_nodes()} {current_graph.number_of_edges()}\n")
+            file.write(
+                f"{current_graph.number_of_nodes()} {current_graph.number_of_edges()}\n"
+            )
             file.write(data)
