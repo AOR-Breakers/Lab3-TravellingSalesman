@@ -42,14 +42,21 @@ public:
   };
 
   int select(const Population &P) {
-    std::vector<std::vector<Chromosome>> Splitted = splitByRanks(P);
-    int RandomRank = pickRank();
-    int SplittedPartSize = Splitted[RandomRank].size();
+    std::vector<int> SortedByFitnessIdicies = sortByFitnessIndices(P);
     int PartSize = std::floor(P.size() / RanksNumber);
-    std::uniform_int_distribution<int> DistInt(0, SplittedPartSize - 1);
-    int RandomIndex = DistInt(Engine);
+    int RandomRank = pickRank();
+    int RandomIndex;
+    if (RandomRank == RanksNumber - 1) {
+      std::uniform_int_distribution<int> DistInt(0, P.size() -
+                                                        RandomRank * PartSize);
+      RandomIndex = DistInt(Engine);
+    } else {
 
-    return PartSize * RandomRank + RandomIndex;
+      std::uniform_int_distribution<int> DistInt(0, PartSize);
+      RandomIndex = DistInt(Engine);
+    }
+
+    return SortedByFitnessIdicies[PartSize * RandomRank + RandomIndex];
   }
 
   int pickRank() {
@@ -64,26 +71,17 @@ public:
     return RanksNumber - 1;
   }
 
-  std::vector<std::vector<Chromosome>> splitByRanks(const Population &P) {
+  std::vector<int> sortByFitnessIndices(const Population &P) {
     std::vector<Chromosome> Chromosomes = P.getChromosomes();
-    std::sort(Chromosomes.begin(), Chromosomes.end(),
-              [](const Chromosome &A, const Chromosome &B) {
-                return A.getFitness() < B.getFitness();
+    std::vector<int> SortedByFitnessIdicies(Chromosomes.size());
+    std::iota(std::begin(SortedByFitnessIdicies),
+              std::end(SortedByFitnessIdicies), 0);
+
+    std::sort(std::begin(SortedByFitnessIdicies),
+              std::end(SortedByFitnessIdicies), [&Chromosomes](int X, int Y) {
+                return Chromosomes[X].getFitness() <
+                       Chromosomes[Y].getFitness();
               });
-
-    int PartSize = std::floor(P.size() / RanksNumber);
-    std::vector<std::vector<Chromosome>> ChromosomesSplitted(RanksNumber);
-    for (int Rank = 0; Rank < RanksNumber - 1; ++Rank) {
-      for (int Index = (Rank)*PartSize; Index < (Rank + 1) * PartSize;
-           ++Index) {
-        ChromosomesSplitted[Rank].push_back(Chromosomes[Index]);
-      }
-    }
-    for (int Index = (RanksNumber - 1) * PartSize; Index < Chromosomes.size();
-         ++Index) {
-
-      ChromosomesSplitted[RanksNumber - 1].push_back(Chromosomes[Index]);
-    }
-    return ChromosomesSplitted;
+    return SortedByFitnessIdicies;
   }
 };

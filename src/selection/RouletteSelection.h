@@ -1,5 +1,5 @@
 #include <random>
-#pragma "once"
+#pragma once
 
 #include "Selection.h"
 

@@ -22,10 +22,8 @@ public:
     FitnessSum = std::accumulate(
         Chromosomes.begin(), Chromosomes.end(), 0,
         [&](int Sum, const Chromosome &C) { return Sum + C.getFitness(); });
-    std::cout << FitnessSum << '\n';
 
     for (int Index = 0; Index < Size; ++Index) {
-      std::cout << "Fitness: " << Chromosomes[Index].getFitness() << '\n';
       RouleteProbabiliets[Index] =
           static_cast<double>(Chromosomes[Index].getFitness()) /
           static_cast<double>(FitnessSum);
@@ -40,11 +38,9 @@ public:
 
   std::vector<Chromosome> getChromosomes() const { return Chromosomes; }
 
-  void addChromosome(const Chromosome C) { Chromosomes.push_back(C); }
   Chromosome get(int Index) const { return Chromosomes[Index]; }
-  void replace(int Index, Chromosome C) { Chromosomes[Index] = C; }
 
-  Chromosome getBest() {
+  Chromosome getBest() const {
     Chromosome Best = Chromosomes[0];
     for (auto &C : Chromosomes) {
       if (C.getFitness() < Best.getFitness()) {

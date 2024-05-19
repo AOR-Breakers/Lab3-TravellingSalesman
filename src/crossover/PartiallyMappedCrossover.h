@@ -23,7 +23,7 @@ public:
 
     std::map<int, int> P1Map;
     std::map<int, int> P2Map;
-    for (int Index = StartPos; Index < EndPos; ++Index) {
+    for (int Index = StartPos; Index <= EndPos; ++Index) {
       P1Map.insert({Child2Path[Index], Child1Path[Index]});
       P2Map.insert({Child1Path[Index], Child2Path[Index]});
       Child1Path[Index] = P2Path[Index];
@@ -31,18 +31,20 @@ public:
     }
 
     for (int Index = 0; Index < Size; ++Index) {
-      if (Index >= StartPos && Index < EndPos)
+      if (Index >= StartPos && Index <= EndPos)
         continue;
 
       int CurrentGene = P1Path[Index];
-      while (P1Map.find(CurrentGene) != P1Map.end())
+      while (P1Map.find(CurrentGene) != P1Map.end()) {
         CurrentGene = P1Map[CurrentGene];
+      }
 
       Child1Path[Index] = CurrentGene;
 
       CurrentGene = P2Path[Index];
-      while (P2Map.find(CurrentGene) != P2Map.end())
+      while (P2Map.find(CurrentGene) != P2Map.end()) {
         CurrentGene = P2Map[CurrentGene];
+      }
 
       Child2Path[Index] = CurrentGene;
     }

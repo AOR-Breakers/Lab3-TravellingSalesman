@@ -57,46 +57,52 @@ public:
          CurrentSimilarity < TargetSimilarity && Cycle < MaximalCyclesNumber;
          ++Cycle) {
 
-      int Parent1Index = SelectionAlg->select(CurrentPopulation);
-      int Parent2Index = SelectionAlg->select(CurrentPopulation);
+      std::vector<Chromosome> Chromosomes;
+      for (int Iter = 0; Iter < PopulationSize / 2; ++Iter) {
 
-      std::pair<Chromosome, Chromosome> CrossoverRes = CrossoverAlg->crossover(
-          ProblemGraph, CurrentPopulation.get(Parent1Index),
-          CurrentPopulation.get(Parent2Index));
+        int Parent1Index = SelectionAlg->select(CurrentPopulation);
+        int Parent2Index = SelectionAlg->select(CurrentPopulation);
 
-      Chromosome Child1 = CrossoverRes.first, Child2 = CrossoverRes.second;
+        std::pair<Chromosome, Chromosome> CrossoverRes =
+            CrossoverAlg->crossover(ProblemGraph,
+                                    CurrentPopulation.get(Parent1Index),
+                                    CurrentPopulation.get(Parent2Index));
 
-      double ProbMutateChild1 = DistProb(Engine);
-      double ProbMutateChild2 = DistProb(Engine);
+        Chromosome Child1 = CrossoverRes.first, Child2 = CrossoverRes.second;
 
-      if (ProbMutateChild1 < MutationProbabilty) {
-        Child1 = MutationAlg->mutate(ProblemGraph, Child1);
+        double ProbMutateChild1 = DistProb(Engine);
+        double ProbMutateChild2 = DistProb(Engine);
+
+        if (ProbMutateChild1 < MutationProbabilty) {
+          Child1 = MutationAlg->mutate(ProblemGraph, Child1);
+        }
+        if (ProbMutateChild2 < MutationProbabilty) {
+          Child2 = MutationAlg->mutate(ProblemGraph, Child2);
+        }
+
+        Chromosomes.push_back(Child1);
+        Chromosomes.push_back(Child2);
+
+        /*int minIndex = 0;
+        double minFitness = population.chromosomes[0].fitness;
+        for (int i = 0; i < population.chromosomes.size(); ++i) {
+            if (population.chromosomes[i].fitness < minFitness) {
+                minIndex = i;
+                minFitness = population.chromosomes[i].fitness;
+            }
+        }
+
+        if (Child1.fitness > Child2.fitness) {
+            population.chromosomes[minIndex] = Child2;
+        } else {
+            population.chromosomes[minIndex] = Child1;
+        }*/
       }
-      if (ProbMutateChild2 < MutationProbabilty) {
-        Child2 = MutationAlg->mutate(ProblemGraph, Child2);
-      }
-
-      CurrentPopulation.replace(Parent1Index, Child1);
-      CurrentPopulation.replace(Parent2Index, Child2);
-
-      /*int minIndex = 0;
-      double minFitness = population.chromosomes[0].fitness;
-      for (int i = 0; i < population.chromosomes.size(); ++i) {
-          if (population.chromosomes[i].fitness < minFitness) {
-              minIndex = i;
-              minFitness = population.chromosomes[i].fitness;
-          }
-      }
-
-      if (Child1.fitness > Child2.fitness) {
-          population.chromosomes[minIndex] = Child2;
-      } else {
-          population.chromosomes[minIndex] = Child1;
-      }*/
+      CurrentPopulation = Population(Chromosomes);
 
       CurrentSimilarity =
           percentageOfSimilarFitness(CurrentPopulation, SimilarityTolerance);
-      if (Cycle % 10000 == 0) {
+      if (Cycle % 10 == 0) {
         Chromosome C = CurrentPopulation.getBest();
         std::cout << "Cycles: " << Cycle << '\n';
         std::cout << "Similarity: " << CurrentSimilarity << '\n';
