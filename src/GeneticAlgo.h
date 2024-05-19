@@ -56,6 +56,7 @@ public:
     for (int64_t Cycle = 0;
          CurrentSimilarity < TargetSimilarity && Cycle < MaximalCyclesNumber;
          ++Cycle) {
+
       int Parent1Index = SelectionAlg->select(CurrentPopulation);
       int Parent2Index = SelectionAlg->select(CurrentPopulation);
 
