@@ -1,4 +1,5 @@
 #include "RouletteSelection.h"
+#include <iostream>
 #include <random>
 
 int RouleteSelection::select(const Population &P) {
