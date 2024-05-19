@@ -47,9 +47,10 @@ int main() {
   double TargetSimilarity = 0.95;
   double MutationProbabilty = 0.7;
   int MaximalCyclesNumber = 1e6;
-  Population Res =
-      GA.start(PopulationSize, SimilarityTolerance, TargetSimilarity,
-               MutationProbabilty, MaximalCyclesNumber);
+  int MaximalCyclesWithoutNewBest = 1000;
+  Population Res = GA.start(PopulationSize, SimilarityTolerance,
+                            TargetSimilarity, MutationProbabilty,
+                            MaximalCyclesNumber, MaximalCyclesWithoutNewBest);
 
   Chromosome Best = Res.getBest();
   printVector(Best.getPath());

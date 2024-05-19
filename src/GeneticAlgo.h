@@ -6,6 +6,7 @@
 #include "mutation/Mutation.h"
 #include "selection/Selection.h"
 #include <algorithm>
+#include <cstdint>
 #include <iostream>
 #include <random>
 
@@ -15,6 +16,7 @@ private:
   Crossover *CrossoverAlg;
   Mutation *MutationAlg;
   Selection *SelectionAlg;
+  Chromosome Best;
 
   std::random_device RandomDevice;
   std::default_random_engine Engine;
@@ -44,17 +46,19 @@ public:
     DistProb = std::uniform_real_distribution<double>(0, 1);
   };
 
-  Population start(const int PopulationSize,
+  Chromosome start(const int PopulationSize,
                    const double SimilarityTolerance = 0.05,
                    const double TargetSimilarity = 0.95,
                    const double MutationProbabilty = 0.5,
-                   const int MaximalCyclesNumber = 1e6) {
+                   const int MaximalCyclesNumber = 1e6,
+                   const int MaximalCyclesWithoutNewBest = 1e6) {
     double CurrentSimilarity = 0.0;
 
     Population CurrentPopulation = generateFirstPopulation(PopulationSize);
-
-    for (int64_t Cycle = 0;
-         CurrentSimilarity < TargetSimilarity && Cycle < MaximalCyclesNumber;
+    Best = CurrentPopulation.getBest();
+    for (int64_t Cycle = 0, CyclesWithouNewBest = 0;
+         CurrentSimilarity < TargetSimilarity && Cycle < MaximalCyclesNumber &&
+         CyclesWithouNewBest < MaximalCyclesWithoutNewBest;
          ++Cycle) {
 
       std::vector<Chromosome> Chromosomes;
@@ -99,19 +103,26 @@ public:
         }*/
       }
       CurrentPopulation = Population(Chromosomes);
+      CyclesWithouNewBest++;
+
+      Chromosome PopulationBest = CurrentPopulation.getBest();
+      if (PopulationBest.getFitness() < Best.getFitness()) {
+        Best = PopulationBest;
+        CyclesWithouNewBest = 0;
+      }
 
       CurrentSimilarity =
           percentageOfSimilarFitness(CurrentPopulation, SimilarityTolerance);
       if (Cycle % 10 == 0) {
-        Chromosome C = CurrentPopulation.getBest();
         std::cout << "Cycles: " << Cycle << '\n';
         std::cout << "Similarity: " << CurrentSimilarity << '\n';
-        std::cout << C.getFitness() << '\n';
+        std::cout << "PopulationBest: " << PopulationBest.getFitness() << '\n';
+        std::cout << "OverallBest: " << Best.getFitness() << '\n';
         std::cout << '\n';
       }
     }
 
-    return CurrentPopulation;
+    return Best;
   }
 
   double similarity(double X, double Y) {
