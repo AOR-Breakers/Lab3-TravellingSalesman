@@ -11,6 +11,8 @@ set(CMAKE_CXX_FLAGS_RELEASE "-O3")
 
 set(CMAKE_C_LINKER_FLAGS “-g -Wall -Werror”)
 
+# add_compile_options(-fsanitize=address) add_link_options(-fsanitize=address)
+
 add_executable(${PROJECT_NAME} src/main.cpp)
 add_subdirectory(src)
 

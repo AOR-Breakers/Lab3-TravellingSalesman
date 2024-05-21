@@ -1,16 +1,36 @@
 #pragma once
 
 #include "Chromosome.h"
+#include <cmath>
 #include <cstdlib>
+#include <iomanip>
 #include <iostream>
 #include <numeric>
+#include <string>
 #include <vector>
 
 class Population {
   std::vector<Chromosome> Chromosomes;
   int FitnessSum = 0;
   int Size;
+  double AverageFitness = 0;
+  double VarianceFitness = 0;
+
   std::vector<double> RouleteProbabiliets;
+
+  double calculateAverageFitness() {
+    return static_cast<double>(FitnessSum) / static_cast<double>(Size);
+  }
+
+  double calculateVarianceFitness() {
+    double Variance = 0;
+    for (auto &C : Chromosomes) {
+      double D = (static_cast<double>(C.getFitness()) - AverageFitness);
+      Variance += D * D;
+    }
+
+    return Variance / static_cast<double>(Size - 1);
+  }
 
 public:
   Population() = delete;
@@ -28,6 +48,9 @@ public:
           static_cast<double>(Chromosomes[Index].getFitness()) /
           static_cast<double>(FitnessSum);
     }
+
+    AverageFitness = calculateAverageFitness();
+    VarianceFitness = calculateVarianceFitness();
   }
 
   double size() const { return Size; }
@@ -49,4 +72,10 @@ public:
     }
     return Best;
   }
+
+  double getAverageFitness() const { return AverageFitness; }
+
+  double getVarianceFitness() const { return VarianceFitness; }
+
+  double getStdFitness() const { return std::sqrt(VarianceFitness); }
 };

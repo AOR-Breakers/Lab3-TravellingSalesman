@@ -18,6 +18,8 @@ private:
   Selection *SelectionAlg;
   Chromosome Best;
 
+  int64_t Cycle = 0;
+
   std::random_device RandomDevice;
   std::default_random_engine Engine;
   std::uniform_real_distribution<double> DistProb;
@@ -50,13 +52,15 @@ public:
                    const double SimilarityTolerance = 0.05,
                    const double TargetSimilarity = 0.95,
                    const double MutationProbabilty = 0.5,
-                   const int MaximalCyclesNumber = 1e6,
-                   const int MaximalCyclesWithoutNewBest = 1e6) {
+                   const int64_t MaximalCyclesNumber = 1e6,
+                   const int64_t MaximalCyclesWithoutNewBest = 1e6) {
     double CurrentSimilarity = 0.0;
 
     Population CurrentPopulation = generateFirstPopulation(PopulationSize);
     Best = CurrentPopulation.getBest();
-    for (int64_t Cycle = 0, CyclesWithouNewBest = 0;
+
+    Cycle = 0;
+    for (int64_t CyclesWithouNewBest = 0;
          CurrentSimilarity < TargetSimilarity && Cycle < MaximalCyclesNumber &&
          CyclesWithouNewBest < MaximalCyclesWithoutNewBest;
          ++Cycle) {
@@ -113,38 +117,58 @@ public:
 
       CurrentSimilarity =
           percentageOfSimilarFitness(CurrentPopulation, SimilarityTolerance);
-      if (Cycle % 10 == 0) {
+      if (Cycle % 1000 == 0) {
         std::cout << "Cycles: " << Cycle << '\n';
+        std::cout << "CyclesWithouNewBest: " << CyclesWithouNewBest << '\n';
         std::cout << "Similarity: " << CurrentSimilarity << '\n';
         std::cout << "PopulationBest: " << PopulationBest.getFitness() << '\n';
         std::cout << "OverallBest: " << Best.getFitness() << '\n';
         std::cout << '\n';
       }
     }
-
+    std::cout << "Cycles: " << Cycle << '\n';
+    std::cout << "Similarity: " << CurrentSimilarity << '\n';
+    std::cout << "OverallBest: " << Best.getFitness() << '\n';
+    std::cout << '\n';
     return Best;
-  }
-
-  double similarity(double X, double Y) {
-    return 1 - std::abs(X - Y) / std::max(X, Y);
-  }
-
-  double similarityFitness(const Chromosome &C1, const Chromosome &C2) {
-    return similarity(C1.getFitness(), C2.getFitness());
   }
 
   double percentageOfSimilarFitness(const Population &P,
                                     double SimilarityTolerance) {
-    double Size = P.size();
-    double Simillar = 0;
-    for (int IndexI = 0; IndexI < Size - 1; ++IndexI) {
-      for (int IndexJ = IndexI + 1; IndexJ < Size; ++IndexJ) {
-        if (1 - similarityFitness(P.get(IndexI), P.get(IndexJ)) <=
-            SimilarityTolerance) {
-          Simillar++;
-        }
+    int Count = 0;
+    for (auto &C : P.getChromosomes()) {
+      double Normalized = std::abs(static_cast<double>(C.getFitness()) -
+                                   P.getAverageFitness()) /
+                          P.getStdFitness();
+      if (Normalized < SimilarityTolerance) {
+        Count++;
       }
     }
-    return Simillar / (Size * (Size - 1) / 2);
+    return static_cast<double>(Count) / static_cast<double>(P.size());
   }
+
+  uint64_t getCycles() { return Cycle; }
+
+  // double similarity(double X, double Y) {
+  //   return 1 - std::abs(X - Y) / std::max(X, Y);
+  // }
+
+  // double similarityFitness(const Chromosome &C1, const Chromosome &C2) {
+  //   return similarity(C1.getFitness(), C2.getFitness());
+  // }
+
+  // double percentageOfSimilarFitness(const Population &P,
+  //                                   double SimilarityTolerance) {
+  //   double Size = P.size();
+  //   double Simillar = 0;
+  //   for (int IndexI = 0; IndexI < Size - 1; ++IndexI) {
+  //     for (int IndexJ = IndexI + 1; IndexJ < Size; ++IndexJ) {
+  //       if (1 - similarityFitness(P.get(IndexI), P.get(IndexJ)) <=
+  //           SimilarityTolerance) {
+  //         Simillar++;
+  //       }
+  //     }
+  //   }
+  //   return Simillar / (Size * (Size - 1) / 2);
+  // }
 };
