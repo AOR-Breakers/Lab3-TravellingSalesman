@@ -115,6 +115,7 @@ public:
           percentageOfSimilarFitness(CurrentPopulation, SimilarityTolerance);
       if (Cycle % 10 == 0) {
         std::cout << "Cycles: " << Cycle << '\n';
+        std::cout << "CyclesWithouNewBest: " << CyclesWithouNewBest << '\n';
         std::cout << "Similarity: " << CurrentSimilarity << '\n';
         std::cout << "PopulationBest: " << PopulationBest.getFitness() << '\n';
         std::cout << "OverallBest: " << Best.getFitness() << '\n';

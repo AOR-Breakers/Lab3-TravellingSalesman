@@ -10,17 +10,19 @@ private:
   std::vector<std::vector<int>> StoredGraph;
   int VerticeCount;
   int EdgeCount;
+  int VeticeNumberingOffset;
   bool IsDirected = false;
 
 public:
   Graph() = delete;
-  explicit Graph(int VerticeCount, int EdgeCount)
-      : VerticeCount(VerticeCount), EdgeCount(EdgeCount),
-        StoredGraph(VerticeCount, std::vector<int>(VerticeCount, 0)){};
+  explicit Graph(int VerticeCount, int EdgeCount, int Offset = 0)
+      : StoredGraph(VerticeCount, std::vector<int>(VerticeCount, 0)),
+        VerticeCount(VerticeCount), EdgeCount(EdgeCount),
+        VeticeNumberingOffset(Offset){};
 
-  explicit Graph(int VerticeCount, int EdgeCount, bool IsDirected)
-      : Graph(VerticeCount, EdgeCount) {
-    IsDirected = IsDirected;
+  explicit Graph(int VerticeCount, int EdgeCount, int Offset, bool IsDirected)
+      : Graph(VerticeCount, EdgeCount, Offset) {
+    this->IsDirected = IsDirected;
   }
 
   int verticeCount() const { return VerticeCount; }
@@ -38,10 +40,10 @@ public:
   static Graph fromFile(std::string Filepath) {
     std::ifstream InputFile(Filepath);
 
-    int VerticeCount, EdgeCount;
-    InputFile >> VerticeCount >> EdgeCount;
+    int VerticeCount, EdgeCount, Offset;
+    InputFile >> VerticeCount >> EdgeCount >> Offset;
 
-    Graph NewGraph(VerticeCount, EdgeCount);
+    Graph NewGraph(VerticeCount, EdgeCount, Offset);
     for (int Index = 0; Index < EdgeCount; ++Index) {
       int V, U;
       double Weight;
@@ -53,12 +55,20 @@ public:
 
   int fitnessFunction(const std::vector<int> &Path) const {
     int Value = 0;
-    for (int Index = 1; Index < Path.size(); ++Index) {
+    for (size_t Index = 1; Index < Path.size(); ++Index) {
       Value += (getEdgeWeight(Path[Index - 1], Path[Index]));
     }
 
     Value += getEdgeWeight(Path[Path.size() - 1], Path[1]);
     return Value;
+  }
+
+  std::vector<int> convertPath(const std::vector<int> &Path) {
+    std::vector<int> NewPath;
+    for (auto &Vertice : Path) {
+      NewPath.push_back(Vertice - VeticeNumberingOffset);
+    }
+    return NewPath;
   }
 };
 

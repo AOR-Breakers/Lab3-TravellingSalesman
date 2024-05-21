@@ -21,10 +21,12 @@ def CollectTspFilesToGraphs(directory: str) -> Dict[str, nx.classes.graph.Graph]
             filepath = os.path.join(directory, filename)
             graph_name = os.path.splitext(filename)[0]
             graph = TspToNetworkXGraph(filepath)
+            offset = 0
             if not graph.has_node(0):
+                offset = -1
                 mapping = {i: i - 1 for i in range(graph.number_of_nodes() + 1)}
                 graph = nx.relabel_nodes(graph, mapping)
-            graphs[graph_name] = graph
+            graphs[graph_name] = (graph, offset)
     return graphs
 
 
@@ -43,7 +45,7 @@ if __name__ == "__main__":
     graphs_dict = CollectTspFilesToGraphs(tsp_data_directory)
 
     for _, problem_name in enumerate(graphs_dict):
-        current_graph = graphs_dict[problem_name]
+        current_graph, offset = graphs_dict[problem_name]
         raw_data_filename = raw_data_directory + problem_name
 
         nx.readwrite.write_weighted_edgelist(current_graph, raw_data_filename)
@@ -51,6 +53,6 @@ if __name__ == "__main__":
             data = file.read()
             file.seek(0, 0)
             file.write(
-                f"{current_graph.number_of_nodes()} {current_graph.number_of_edges()}\n"
+                f"{current_graph.number_of_nodes()} {current_graph.number_of_edges()} {offset}\n"
             )
             file.write(data)
