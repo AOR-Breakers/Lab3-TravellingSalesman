@@ -52,6 +52,10 @@ public:
 
       Child2Path[Index] = CurrentGene;
     }
+    // printVector(P1Path);
+    // printVector(P2Path);
+    // printVector(Child1Path);
+    // printVector(Child2Path);
     std::this_thread::sleep_for(std::chrono::milliseconds(1));
 
     Chromosome Child1 = Chromosome(G, Child1Path);
