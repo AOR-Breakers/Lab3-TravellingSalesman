@@ -8,3 +8,12 @@ Travelling Salesman Problem wth genetic algo
 
 Результаты задачи о Комивояжере:
 https://docs.google.com/spreadsheets/d/19uuPLi0_t4kZBySheOZx_hkyfi35ViadSSvV4McPW9U/edit#gid=0
+
+
+В файле src/main.cpp можно выбрать файл с задачей, алгоритмы Кроссовера, Мутации и Селекции
+```bash
+mkdir build && cd build
+cmake ..
+cmake --build .
+./GeneticAlgo
+```
