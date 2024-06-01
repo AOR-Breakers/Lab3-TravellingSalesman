@@ -59,7 +59,7 @@ public:
       Value += (getEdgeWeight(Path[Index - 1], Path[Index]));
     }
 
-    Value += getEdgeWeight(Path[Path.size() - 1], Path[1]);
+    Value += getEdgeWeight(Path[Path.size() - 1], Path[0]);
     return Value;
   }
 
